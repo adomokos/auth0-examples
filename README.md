@@ -8,9 +8,9 @@ Here is the list:
 
 | app name            | used port |
 | ------------------- | --------- |
+| django-auth0        | 8000      |
 | flask-auth0         | 4000      |
 | rails-api           | 3000      |
 | rails-login-app     | 3000      |
 | react-login-and-api | 5000      |
-
 
