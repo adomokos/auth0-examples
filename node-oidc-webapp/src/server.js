@@ -43,7 +43,39 @@ app.get('/profile', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.status(501).send();
+  // define constants for the authorization request
+  const authorizationEndpoint = oidcProviderInfo['authorization_endpoint'];
+  const responseType = 'id_token';
+  const scope = 'openid';
+  const clientID = process.env.CLIENT_ID;
+  const redirectUri = 'http://localhost:3000/callback';
+  const responseMode = 'form_post';
+  const nonce = crypto.randomBytes(16).toString('hex');
+  // define a signed cookie, containing the nonce value
+  const options = {
+    maxAge: 1000 * 60 * 15,
+    httpOnly: true, // The cookie only accessible by the web server
+    signed: true
+  };
+
+  // add cookie to the response and issue a 302 redirecting the user
+  res
+    .cookie(nonceCookie, nonce, options)
+    .redirect(
+      authorizationEndpoint +
+        '?response_mode=' +
+        responseMode +
+        '&response_type=' +
+        responseType +
+        '&scope=' +
+        scope +
+        '&client_id=' +
+        clientID +
+        '&redirect_uri=' +
+        redirectUri +
+        '&nonce=' +
+        nonce
+    );
 });
 
 app.post('/callback', async (req, res) => {
