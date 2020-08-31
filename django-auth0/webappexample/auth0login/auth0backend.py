@@ -15,10 +15,10 @@ class Auth0(BaseOAuth2):
     ]
 
     def authorization_url(self):
-        return 'https://' + self.setting('DOMAIN') + '/authorize'
+        return 'https://' + self.setting('SOCIAL_AUTH_AUTH0_DOMAIN') + '/authorize'
 
     def access_token_url(self):
-        return 'https://' + self.setting('DOMAIN') + '/oauth/token'
+        return 'https://' + self.setting('SOCIAL_AUTH_AUTH0_DOMAIN') + '/oauth/token'
 
     def get_user_id(self, details, response):
         """Return current user id."""
@@ -28,8 +28,8 @@ class Auth0(BaseOAuth2):
         # Obtain JWT and the keys to validate the signature
         id_token = response.get('id_token')
         jwks = request.urlopen(
-            'https://' + self.setting('DOMAIN') + '/.well-known/jwks.json')
-        issuer = 'https://' + self.setting('DOMAIN') + '/'
+            'https://' + self.setting('SOCIAL_AUTH_AUTH0_DOMAIN') + '/.well-known/jwks.json')
+        issuer = 'https://' + self.setting('SOCIAL_AUTH_AUTH0_DOMAIN') + '/'
         audience = self.setting('KEY')  # CLIENT_ID
         payload = jwt.decode(id_token, jwks.read(), algorithms=[
                              'RS256'], audience=audience, issuer=issuer)
