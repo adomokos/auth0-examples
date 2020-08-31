@@ -95,8 +95,6 @@ app.post('/callback', async (req, res) => {
   // decode token
   const decodeToken = jwt.decode(id_token, { complete: true });
 
-  console.log(decodeToken);
-
   // get key id
   const kid = decodeToken.header.kid;
 
@@ -132,6 +130,7 @@ app.post('/callback', async (req, res) => {
       return res.status(401).send();
     }
 
+    console.log(verifiedToken);
     req.session.decodedIdToken = verifiedToken;
     req.session.idToken = id_token;
 
