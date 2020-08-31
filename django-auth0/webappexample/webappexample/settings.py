@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
-
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -22,7 +24,7 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '47vo9%_p0m6ob)3)4n$+(mupd4*%&jbx=-r*k4gy+^9iizo$o^'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -124,9 +126,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 SOCIAL_AUTH_TRAILING_SLASH = False  # Remove trailing slash from routes
-SOCIAL_AUTH_AUTH0_KEY = os.environ.get('AUTH0_CLIENT_ID')
-SOCIAL_AUTH_AUTH0_SECRET = os.environ.get('AUTH0_CLIENT_SECRET')
-SOCIAL_AUTH_AUTH0_DOMAIN = os.environ.get('AUTH0_CLIENT_DOMAIN')
+SOCIAL_AUTH_AUTH0_KEY = os.getenv('AUTH0_CLIENT_ID')
+SOCIAL_AUTH_AUTH0_SECRET = os.getenv('AUTH0_CLIENT_SECRET')
+SOCIAL_AUTH_AUTH0_DOMAIN = os.getenv('AUTH0_CLIENT_DOMAIN')
 
 SOCIAL_AUTH_AUTH0_SCOPE = [
     'openid',
