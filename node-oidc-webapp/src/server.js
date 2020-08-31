@@ -46,7 +46,11 @@ app.get('/login', (req, res) => {
   // define constants for the authorization request
   const authorizationEndpoint = oidcProviderInfo['authorization_endpoint'];
   const responseType = 'id_token';
-  const scope = 'openid';
+  // To see more info about the user
+  // Initially the openid info was retrieved, but profile and email was added
+  // Go to `curl -X GET https://<DOMAIN>/.well-known/openid-configuration | jq` to see
+  // what scopes are supported
+  const scope = 'openid profile email';
   const clientID = process.env.CLIENT_ID;
   const redirectUri = 'http://localhost:3000/callback';
   const responseMode = 'form_post';
