@@ -45,16 +45,19 @@ app.get('/profile', (req, res) => {
 app.get('/login', (req, res) => {
   // define constants for the authorization request
   const authorizationEndpoint = oidcProviderInfo['authorization_endpoint'];
-  const responseType = 'id_token';
+  // id_token was used, switching to code - "Authorization Code Flow"
+  const responseType = 'code';
   // To see more info about the user
   // Initially the openid info was retrieved, but profile and email was added
   // Go to `curl -X GET https://<DOMAIN>/.well-known/openid-configuration | jq` to see
   // what scopes are supported
-  const scope = 'openid profile email';
+  const scope = 'openid profile email read:to-dos';
   const clientID = process.env.CLIENT_ID;
   const redirectUri = 'http://localhost:3000/callback';
-  const responseMode = 'form_post';
+  const responseMode = 'query';
   const nonce = crypto.randomBytes(16).toString('hex');
+  const audience = process.env.API_IDENTIFIER;
+
   // define a signed cookie, containing the nonce value
   const options = {
     maxAge: 1000 * 60 * 15,
@@ -78,69 +81,89 @@ app.get('/login', (req, res) => {
         '&redirect_uri=' +
         redirectUri +
         '&nonce=' +
-        nonce
+        nonce +
+        '&audience=' + audience
     );
 });
 
-app.post('/callback', async (req, res) => {
-  // take nonce from cookie
-  const nonce = req.signedCookies[nonceCookie];
+function validateIdToken(idToken, nonce) {
+  const decodedToken = jwt.decode(idToken);
 
-  // delete nonce
+  // fetch ID token details
+  const {
+    nonce: decodedNonce,
+    aud: audience,
+    exp: expirationDate,
+    iss: issuer
+  } = decodedToken;
+
+  const currentTime = Math.floor(Date.now() / 1000)
+  const expectedAudience = process.env.CLIENT_ID;
+
+  // Validate ID tokens
+  if (
+    audience !== expectedAudience ||
+    decodedNonce !== nonce ||
+    expirationDate < currentTime ||
+    issuer !== oidcProviderInfo['issuer']
+  )
+    throw Error();
+
+  // return the decoded token
+  return decodedToken;
+}
+
+app.get('/callback', async (req, res) => {
+  const { code } = req.query;
+
+  const codeExchangeOptions = {
+    grant_type: 'authorization_code',
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+    code: code,
+    redirect_uri: 'http://localhost:3000/callback'
+  }
+
+  const codeExchangeResponse = await request.post(
+    `https://${process.env.OIDC_PROVIDER}/oauth/token`,
+    { form: codeExchangeOptions }
+  );
+
+  // parse response to get tokens
+  const tokens = JSON.parse(codeExchangeResponse);
+  req.session.accessToken = tokens.access_token;
+
+  // extract nonce from cookie
+  const nonce = req.signedCookies[nonceCookie];
   delete req.signedCookies[nonceCookie];
 
-  // take ID token posted by the user
-  const { id_token } = req.body;
-
-  // decode token
-  const decodeToken = jwt.decode(id_token, { complete: true });
-
-  // get key id
-  const kid = decodeToken.header.kid;
-
-  // get public key
-  const client = jwksClient({
-    jwksUri: oidcProviderInfo['jwks_uri']
-  });
-
-  client.getSigningKey(kid, (err, key) => {
-    const signingKey = key.publicKey || key.rsaPublicKey;
-
-    // Verify signature and decode token
-    const verifiedToken = jwt.verify(id_token, signingKey);
-
-    // check audience, nonce and expiration time
-    const {
-      nonce: decodedNonce,
-      aud: audience,
-      exp: expirationDate,
-      iss: issuer
-    } = verifiedToken;
-
-    const currentTime = Math.floor(Date.now() / 1000);
-    const expectedAudience = process.env.CLIENT_ID;
-
-    if (
-      audience !== expectedAudience ||
-      decodedNonce !== nonce ||
-      expirationDate < currentTime ||
-      issuer !== oidcProviderInfo['issuer']
-    ) {
-      // send an unauthorized http status
-      return res.status(401).send();
-    }
-
-    console.log(verifiedToken);
-    req.session.decodedIdToken = verifiedToken;
-    req.session.idToken = id_token;
-
-    // Send the decoded version of the ID token
+  try {
+    req.session.decodedIddToken = validateIdToken(tokens.id_token, nonce);
+    req.session.idToken = tokens.id_token;
     res.redirect('/profile');
-  });
+  } catch (error) {
+    res.status(401).send();
+  }
 });
 
 app.get('/to-dos', async (req, res) => {
-  res.status(501).send();
+  const delegatedRequestOptions = {
+    url: 'http://localhost:3001',
+    headers: {
+      Authorization: `Bearer ${req.session.accessToken}`
+    }
+  };
+
+  try {
+    const delegatedResponse = await request(delegatedRequestOptions);
+    const toDos = JSON.parse(delegatedResponse);
+
+    res.render('to-dos', {
+      toDos,
+    });
+  } catch (error) {
+    res.status(error.statusCode).send(error);
+  }
 });
 
 app.get('/remove-to-do/:id', async (req, res) => {
