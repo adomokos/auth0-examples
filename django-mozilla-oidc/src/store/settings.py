@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '13n5s32qpi&7gy=hng-%7gf291#^g1+-blgxcm4*=!cdlx70=-'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'mozilla_django_oidc',
     'webapp.apps.WebappConfig'
 ]
 
@@ -101,6 +106,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'mozilla_django_oidc': {
+            'handlers': ['console'],
+            'level': 'DEBUG'
+        }
+    }
+}
+
+AUTHENTICATION_BACKENDS = (
+    'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
+)
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -115,6 +143,27 @@ USE_L10N = True
 
 USE_TZ = True
 
+AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
+
+OIDC_RP_CLIENT_ID = os.getenv('AUTH0_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = os.getenv('AUTH0_CLIENT_SECRET')
+OIDC_RP_SIGN_ALGO = "RS256"
+
+# OIDC_RP_IDP_SIGN_KEY = "https://{}/.well-known/jwks.json".format(AUTH0_DOMAIN)
+
+# Set the JWKS Endpoint for the OIDC Provider so JWT signature keys can be verified
+OIDC_OP_JWKS_ENDPOINT = "https://{}/.well-known/jwks.json".format(
+    AUTH0_DOMAIN)
+
+OIDC_OP_AUTHORIZATION_ENDPOINT = "https://{}/authorize".format(AUTH0_DOMAIN)
+OIDC_OP_TOKEN_ENDPOINT = "https://{}/oauth/token".format(AUTH0_DOMAIN)
+OIDC_OP_USER_ENDPOINT = "https://{}/userinfo".format(AUTH0_DOMAIN)
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# We **always** want to store the ID Token since it is used for interactions with the OP
+OIDC_STORE_ID_TOKEN = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/

@@ -21,6 +21,19 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="/">Home</a>
                 </li>
+                {% if request.user.is_authenticated == False %}
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'oidc_authentication_init' %}">Login</a>
+                  </li>
+                {% endif %}
+                {% if request.user.is_authenticated == True %}
+                  <li class="nav-item">
+                      <a class="nav-link" href="/profile">Profile</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="/logout">Log Out</a>
+                  </li>
+                {% endif %}
             </ul>
         </div>
     </div>

@@ -18,5 +18,6 @@ from django.urls import include, path
 
 urlpatterns = [
     path('', include('webapp.urls')),
+    path('oidc/', include('mozilla_django_oidc.urls')),
     path('admin/', admin.site.urls)
 ]
