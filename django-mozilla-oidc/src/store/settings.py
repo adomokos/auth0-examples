@@ -159,7 +159,7 @@ OIDC_OP_AUTHORIZATION_ENDPOINT = "https://{}/authorize".format(AUTH0_DOMAIN)
 OIDC_OP_TOKEN_ENDPOINT = "https://{}/oauth/token".format(AUTH0_DOMAIN)
 OIDC_OP_USER_ENDPOINT = "https://{}/userinfo".format(AUTH0_DOMAIN)
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "/profile"
 LOGOUT_REDIRECT_URL = "/"
 
 # We **always** want to store the ID Token since it is used for interactions with the OP

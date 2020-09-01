@@ -1,6 +1,6 @@
 from django.shortcuts import render
-
-# Create your views here.
+import json
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -18,3 +18,19 @@ def index(request):
     }
 
     return render(request, 'webapp/index.html', context)
+
+
+@login_required
+def profile(request):
+    user = request.user
+    #  auth0user = user.social_auth.get(provider='auth0')
+    userdata = {
+        'user_id': user.id,
+        'name': user.first_name,
+        'email': user.email
+    }
+
+    return render(request, 'webapp/profile.html', {
+        'user': user,
+        'userdata': json.dumps(userdata, indent=4)
+    })
