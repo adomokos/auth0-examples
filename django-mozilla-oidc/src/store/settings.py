@@ -165,6 +165,8 @@ LOGOUT_REDIRECT_URL = "/"
 # We **always** want to store the ID Token since it is used for interactions with the OP
 OIDC_STORE_ID_TOKEN = True
 
+OIDC_RP_SCOPES = "openid profile email picture"
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 

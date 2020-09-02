@@ -25,9 +25,9 @@ def profile(request):
     user = request.user
     #  auth0user = user.social_auth.get(provider='auth0')
     userdata = {
-        'user_id': user.id,
+        'id': user.id,
         'name': user.first_name,
-        'email': user.email
+        'email': user.email,
     }
 
     return render(request, 'webapp/profile.html', {
