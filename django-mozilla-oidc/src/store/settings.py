@@ -162,6 +162,9 @@ OIDC_OP_USER_ENDPOINT = "https://{}/userinfo".format(AUTH0_DOMAIN)
 LOGIN_REDIRECT_URL = "/profile"
 LOGOUT_REDIRECT_URL = "/"
 
+OIDC_LOGOUT_URL = "https://{}/v2/logout".format(AUTH0_DOMAIN)
+OIDC_OP_LOGOUT_URL_METHOD = 'store.utils.provider_logout'
+
 # We **always** want to store the ID Token since it is used for interactions with the OP
 OIDC_STORE_ID_TOKEN = True
 
