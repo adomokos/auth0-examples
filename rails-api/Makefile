@@ -1,6 +1,10 @@
 -include .env.$(or $(APP_ENV),development)
 export
 
+.PHONY: run
+run: ## Runs the Rails app
+	bundle exec rails s
+
 .PHONY: authenticate
 authenticate: ## Calls Auth0 to authenticate
 	curl --request POST \
