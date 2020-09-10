@@ -1,5 +1,10 @@
 # Auth0 React SDK Sample Application
 
+```
+This app needs an API server running, with these examples,
+just fire up the Rails API server.
+```
+
 This sample demonstrates the integration of [Auth0 React SDK](https://github.com/auth0/auth0-react) into a React application created using [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html). The sample is a companion to the [Auth0 React SDK Quickstart](https://auth0.com/docs/quickstart/spa/react).
 
 This sample demonstrates the following use cases:
